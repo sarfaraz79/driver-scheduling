@@ -2,6 +2,12 @@
 
 Private group repository for the ID5059 coursework project.
 
+## Running
+
+```
+jupyter notebook
+```
+
 ## Objective
 Build models to predict Manhattan ride demand and fare/revenue using 2024 NYC Taxi data.
 
