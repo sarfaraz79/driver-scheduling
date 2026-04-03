@@ -99,13 +99,22 @@ def group_zone_hour(
     return df
 
 rides_agg = group_zone_hour(
-    rides_clean,
+    rides_clean.assign(
+        ratecode_is_airport=lambda x: x["RatecodeID"] != 1,
+    ),
     dict(
-        duration_hours=["sum", "count"],
-        trip_distance="sum",
-        fare_amount="sum",
-        total_amount="sum",
+        duration_hours=["count", "sum", "mean"],
+        trip_distance=["sum", "mean"],
+        avg_speed_mph="mean",
+        fare_amount=["sum", "mean"],
+        total_amount=["sum", "mean"],
+        tip_amount="mean",
+        mta_tax="mean",
+        improvement_surcharge="mean",
+        congestion_surcharge="mean",
+        passenger_count="mean",
         fare_per_hour="mean",
+        ratecode_is_airport=["mean"],
     ),
 )
 
@@ -152,7 +161,17 @@ for feat in ["duration_hours_sum", "fare_amount_sum", "total_amount_sum", "fare_
             offsets=offsets,
         )
 
-rides_lag
+###
+
+rides_lag.to_csv("../dataset-features/rides_sample.csv")
+
+###
+
+rides_lag = rides_lag.assign(
+    day_of_week = rides_lag["pickup_hour"].dt.day_of_week,
+    hour = rides_lag["pickup_hour"].dt.hour,
+    month = rides_lag["pickup_hour"].dt.month,
+)
 
 ###
 
