@@ -1,4 +1,5 @@
 ###
+
 import numpy as np
 import pandas as pd
 import sklearn as sk
@@ -264,7 +265,7 @@ for i, ax in nplots(len(cats), 3):
 for i, ax in nplots(2, 1, figsize=(10, 8)):
     sns.boxenplot(
         ax=ax,
-        data=sample(rides_feat, n=1_000_000),
+        data=sample(rides_feat[rides_feat["tip_ratio"] < 1], n=1_000_000),
         x="PULocationID",
         y=["tip_amount", "tip_ratio"][i],
         order=sorted(rides_feat["PULocationID"].unique(), key=int),
@@ -541,200 +542,6 @@ from sklearn.model_selection import cross_validate, ShuffleSplit
 from sklearn.metrics import mean_squared_error
 from sklearn.ensemble import RandomForestRegressor
 
-###
-
-incols = [
-    x
-    for x in rides_feat.columns
-    if x not in [
-        "fare_amount",
-        "tpep_pickup_datetime",
-        "tpep_dropoff_datetime",
-        "pickup_hour",
-        "tip_amount",
-        "amount_per_hour",
-        "total_amount",
-        "mta_tax",
-        "fare_per_hour",
-        "tolls_amount",
-
-        # "trip_distance",
-        # "duration_hours",
-    ]
-]
-
-rf = RandomForestRegressor(n_estimators=100, max_samples=10_000, random_state=5059, verbose=10, n_jobs=8)
-rf.fit(
-    rides_feat[rides_feat["fare_amount"] != 70][dbg(incols)],
-    rides_feat[rides_feat["fare_amount"] != 70]["fare_amount"],
-)
-
-###
-
-importances = pd.DataFrame(
-    [
-        tree.feature_importances_
-        for tree in rf.estimators_
-    ],
-    columns=incols,
-)
-
-for i, ax in nplots(2, 1, tight=True):
-    if i == 0:
-        sns.boxenplot(
-            ax=ax,
-            data=importances,
-
-        )
-        ax.tick_params(axis="x", rotation=90, labelsize=7)
-    else:
-        pred = rf.predict(sample(rides_feat[rides_feat["fare_amount"] != 70])[incols])
-        actual = sample(rides_feat[rides_feat["fare_amount"] != 70])["fare_amount"]
-        sns.scatterplot(
-            ax=ax,
-            x=pred,
-            y=actual,
-            s=0.5,
-            linewidth=0,
-        ),
-        ax.set_xlabel("prediction")
-        ax.set_ylabel("actual")
-        mse = mean_squared_error(pred, actual),
-        print(np.sqrt(mse))
-
-###
-
-for i, ax in nplots(5, 1, tight=True, figsize=(6, 8)):
-    importances = pd.Series(rf.estimators[i].feature_importances_, index=incols)
-    importances.plot.bar(ax=ax, xticks=[] if i != 4 else None)
-
-np.sqrt(-xv["test_score"])
-
-###
-
-incols = [
-    x
-    for x in rides_feat.columns
-    if x not in [
-        "fare_amount",
-        "tpep_pickup_datetime",
-        "tpep_dropoff_datetime",
-        "pickup_hour",
-        "tip_amount",
-        "amount_per_hour",
-        "total_amount",
-        "mta_tax",
-        "fare_per_hour",
-        "tolls_amount",
-
-        "trip_distance",
-        "duration_hours",
-        "avg_speed_mph",
-    ]
-]
-
-rf = RandomForestRegressor(n_estimators=100, max_samples=10_000, random_state=5059, verbose=10, n_jobs=8)
-rf.fit(
-    rides_feat[rides_feat["fare_amount"] != 70][dbg(incols)],
-    rides_feat[rides_feat["fare_amount"] != 70]["trip_distance"],
-)
-
-###
-
-importances = pd.DataFrame(
-    [
-        tree.feature_importances_
-        for tree in rf.estimators_
-    ],
-    columns=incols,
-)
-
-for i, ax in nplots(2, 1, tight=True):
-    if i == 0:
-        sns.boxenplot(
-            ax=ax,
-            data=importances,
-
-        )
-        ax.tick_params(axis="x", rotation=90, labelsize=7)
-    else:
-        pred = rf.predict(sample(rides_feat[rides_feat["fare_amount"] != 70])[incols])
-        actual = sample(rides_feat[rides_feat["fare_amount"] != 70])["trip_distance"]
-        sns.scatterplot(
-            ax=ax,
-            x=pred,
-            y=actual,
-            s=0.5,
-            linewidth=0,
-        ),
-        ax.set_xlabel("prediction")
-        ax.set_ylabel("actual")
-        mse = mean_squared_error(pred, actual),
-        print(np.sqrt(mse))
-
-###
-
-incols = [
-    x
-    for x in rides_feat.columns
-    if x not in [
-        "fare_amount",
-        "tpep_pickup_datetime",
-        "tpep_dropoff_datetime",
-        "pickup_hour",
-        "tip_amount",
-        "amount_per_hour",
-        "total_amount",
-        "mta_tax",
-        "fare_per_hour",
-        "tolls_amount",
-        "pickup_day_of_week",
-
-        "trip_distance",
-        "duration_hours",
-        "avg_speed_mph",
-    ]
-]
-
-rf = RandomForestRegressor(n_estimators=100, max_samples=10_000, random_state=5059, verbose=10, n_jobs=8)
-rf.fit(
-    rides_feat[rides_feat["fare_amount"] != 70][dbg(incols)],
-    rides_feat[rides_feat["fare_amount"] != 70]["duration_hours"],
-)
-
-###
-
-importances = pd.DataFrame(
-    [
-        tree.feature_importances_
-        for tree in rf.estimators_
-    ],
-    columns=incols,
-)
-
-for i, ax in nplots(2, 1, tight=True):
-    if i == 0:
-        sns.boxenplot(
-            ax=ax,
-            data=importances,
-
-        )
-        ax.tick_params(axis="x", rotation=90, labelsize=7)
-    else:
-        pred = rf.predict(sample(rides_feat[rides_feat["fare_amount"] != 70])[incols])
-        actual = sample(rides_feat[rides_feat["fare_amount"] != 70])["duration_hours"]
-        sns.scatterplot(
-            ax=ax,
-            x=pred,
-            y=actual,
-            s=0.5,
-            linewidth=0,
-        ),
-        ax.set_xlabel("prediction")
-        ax.set_ylabel("actual")
-        mse = mean_squared_error(pred, actual),
-        print(np.sqrt(mse))
-
 ###md
 
 # Confirm relationships with rfs
@@ -751,7 +558,7 @@ for i, ax in nplots(2, 1, tight=True):
 #   * ohe the top N from the previous zone/hour window would lead to
 #     `N * card(DOLocationID)` features
 #   * maybe only consider a subset of the drop off locations, but not
-#     obvious how to pick these; there's bigger fish to fry
+#     obvious how to pick these
 
 ###
 
@@ -764,9 +571,9 @@ def rf_importance(df, xcols, target):
     rf = RandomForestRegressor(
         n_estimators=100,
         max_samples=10_000,
-        random_state=217,
-        verbose=10,
-        n_jobs=8,
+        random_state=271,
+        # verbose=10,
+        n_jobs=-1,
     )
     rf.fit(
         df[xcols],
@@ -913,10 +720,27 @@ def with_lags(
 
 ###
 
+zone_upper_east = [str(x) for x in [236, 237, 141, 142, 262]]
+zone_midtown = [str(x) for x in [161, 162, 163]]
+zone_financial = [str(x) for x in [12, 88, 87, 261]]
+zone_turtle_bay = [str(x) for x in [162, 229]]
+zone_north = [str(x) for x in [42, 116, 127, 243, 255]]
+
 rides_hour = group_zone_hour(
-    rides_feat.assign(
-        tip_ratio=lambda x: x["tip_amount"] / x["total_amount"],
-    ),
+    dbg(pd.concat(
+        [
+            rides_feat,
+            pd.get_dummies(rides_feat["RatecodeID"], prefix="ratecode_is"),
+            pd.DataFrame(dict(
+                do_is_upper_east=rides_feat["DOLocationID"].isin(zone_upper_east),
+                do_is_midtown=rides_feat["DOLocationID"].isin(zone_midtown),
+                do_is_financial=rides_feat["DOLocationID"].isin(zone_financial),
+                do_is_turtle_bay=rides_feat["DOLocationID"].isin(zone_turtle_bay),
+                do_is_north=rides_feat["DOLocationID"].isin(zone_north),
+            ))
+        ],
+        axis=1,
+    )),
     dict(
         passenger_count="mean",
         trip_distance=["sum", "mean"],
@@ -943,6 +767,20 @@ rides_hour = group_zone_hour(
         avg_speed_mph="mean",
         fare_per_hour="mean",
         ratecode_is_airport=["mean", "count"],
+
+        ratecode_is_1="mean",
+        ratecode_is_2="mean",
+        ratecode_is_3="mean",
+        ratecode_is_4="mean",
+        ratecode_is_5="mean",
+        ratecode_is_6="mean",
+        ratecode_is_99="mean",
+
+        do_is_upper_east="mean",
+        do_is_midtown="mean",
+        do_is_financial="mean",
+        do_is_turtle_bay="mean",
+        do_is_north="mean",
     ),
 ).assign(
     pickup_hour_of_day=lambda x: x["pickup_hour"].dt.hour,
@@ -996,9 +834,9 @@ for i, ax in nplots(len(rides_hour.columns), 4):
 ###
 
 group_corrs = [
-    ("cur_duration_hours_mean", "cur_trip_distance_mean", "cur_fare_amount_mean"),
     ("cur_duration_hours_mean", "cur_trip_distance_mean", "cur_count"),
     ("cur_duration_hours_sum", "cur_trip_distance_sum", "cur_count"),
+    ("cur_duration_hours_mean", "cur_trip_distance_mean", "cur_fare_amount_mean"),
 ]
 
 for i, ax in nplots(len(group_corrs), 1):
@@ -1225,5 +1063,6 @@ with oneplot(tight=True) as ax:
 # * use lags for duration and distance
 # * use lags for avg speed, related to trip duration
 # * use lags for tip amount, proxy for pickup/drop off
+# * use lags for zones and
 #
 

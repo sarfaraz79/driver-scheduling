@@ -1,4 +1,5 @@
 ###
+
 import numpy as np
 import pandas as pd
 import sklearn as sk
@@ -33,6 +34,7 @@ def dbg(x):
 
 ###
 
+# Load dataset
 def load_split(pat):
     return pd.concat([
         pd.read_csv(
@@ -66,6 +68,7 @@ def load_split(pat):
 
 ###
 
+# Load zones from csv
 zones = pd.read_csv("../dataset-split/taxi_zone_lookup.csv")
 zones = set(zones[zones["Borough"] == "Manhattan"]["LocationID"])
 
@@ -92,10 +95,12 @@ rides.describe()
 
 ###
 
+# Investigate missing data
 print(rides.isna().mean() * 100)
 
 ###
 
+# Investigate missing data by vendor
 missing_by_vendor = (
     rides
     .groupby("VendorID")
@@ -107,7 +112,9 @@ missing_by_vendor = missing_by_vendor.loc[:, (missing_by_vendor > 0).any()]
 
 print(missing_by_vendor)
 
-###
+###md
+
+# Interestingly, both vendor 1 and 2 miss around 10% of data in the above fields. Vendor 6 does not record such data at all!
 
 ###
 
@@ -122,11 +129,12 @@ rides['store_and_fwd_flag'] = (
 
 ###
 
+# Check data types
 rides.dtypes
 
 ###md
 
-# Add some computed features
+# Add some computed features:
 # * duration, in hours
 # * avg speed
 #
@@ -157,16 +165,16 @@ def ceildiv(a, b):
 
 def nplots(n, cols):
     if DATA_SUBSET == "test":
-        return None
+        return None  # Skip plotting when using test data
 
-    rows = ceildiv(n, cols)
-    figsize=(6 * cols, 4 * rows)
+    rows = ceildiv(n, cols)  # Compute required number of rows
+    figsize = (6 * cols, 4 * rows)
 
-    fig, axes = plt.subplots(rows, cols, figsize=figsize)
+    fig, axes = plt.subplots(rows, cols, figsize=figsize)  # Create subplot grid
 
     for i, ax in enumerate(axes.flatten()):
         if i >= n:
-            fig.delaxes(ax)
+            fig.delaxes(ax)  # Remove unused subplots
             continue
 
         yield i, ax
@@ -182,6 +190,8 @@ raw_categorical = [
     "payment_type",
 ]
 
+# Plot the categoricals to assess distribution
+
 for i, ax in nplots(len(raw_categorical), 2):
     feature = raw_categorical[i]
 
@@ -192,9 +202,9 @@ for i, ax in nplots(len(raw_categorical), 2):
     ax.set_ylabel("count")
     ax.tick_params(axis="x", rotation=45)
 
-###
+###md
 
-# check distributions of target variables of the target variables
+# Plot the raw numerical data to assess distributions
 
 ###
 
@@ -250,10 +260,13 @@ for i, ax in nplots(len(raw_numeric), 4):
 # All negative values must be removed.
 
 # Need to determine cut-off points for the others, to prevent enormous outliers from biasing the models.
-# Below, we try some potential cut-offs and oberve ho
+# Below, we try some potential cut-offs and oberve the tails
 
 print("Counts of extreme / invalid values:\n")
 
+# Tune the below checks to see how data is distributed at the tails
+# Can add new features to the below checks and change the cut-offs as per requirement.
+# During analysis, these have been changed extensively.
 checks = {
     "total_amount > 1000"  : ("total_amount"  , lambda x: x >  1000),
     "total_amount < 0.0"   : ("total_amount"  , lambda x: x <= 0.0),
@@ -283,23 +296,32 @@ for name, (col, condition) in checks.items():
 
 ###
 
+# Investigate some of the values that should be fixed according to TLC Taxis
+
+print(rides["improvement_surcharge"].value_counts(dropna=False))
+print("\n")
+print(rides["congestion_surcharge"].value_counts(dropna=False))
+
+###
+
 def get_constraint_violations(df, pad=1):
 
     violations = {}
-    # These are the cut-offs we apply to the data. They are decided and refined using statistical assessment in 3.0 and checked using 3.2
+    # These are the cut-offs we apply to the data. They are decided and refined using statistical assessment above.
     # The conditions describe what data will be flagged
+    # Reasonable upper bounds are determined based on analysis of the tails of the data - as above and below.
     possible_checks = {
         'passenger_count': lambda x: x < 0,
         'trip_distance': lambda x: (x <= 0) | (x > 40 * pad), # to ensure the taxi actually moved
-        'fare_amount': lambda x: (x < 0) | (x > 100 * pad),
-        'fare_per_hour': lambda x: (x < 0) | (x > 1000 * pad),
-        'extra': lambda x: x < 0,
-        'mta_tax': lambda x: x < 0,
-        'tip_amount': lambda x: (x < 0) | (x > 40 * pad),
-        'tolls_amount': lambda x: (x < 0) | (x > 40 * pad),
-        'improvement_surcharge': lambda x: x < 0,
-        'total_amount': lambda x: (x < 0) | (x > 250 * pad),
-        'congestion_surcharge': lambda x: x < 0,
+        'fare_amount': lambda x: (x < 0) | (x > 100 * pad), # Cannot be negative, reasonable upper bound.
+        'fare_per_hour': lambda x: (x < 0) | (x > 1000 * pad), # Cannot be negative, reasonable upper bound.
+        'extra': lambda x: x < 0, # Cannot be negative
+        'mta_tax': lambda x: (x < 0) | (x > 1 * pad), # MTA is supposed to be $0.5, but accounting for small variance
+        'tip_amount': lambda x: (x < 0) | (x > 40 * pad), # Reasonable upper bound
+        'tolls_amount': lambda x: (x < 0) | (x > 40 * pad), # Reasonable upper bound
+        'improvement_surcharge': lambda x: x != 1.0, # Improv surcharge must be $1 as per TLC Taxi website
+        'total_amount': lambda x: (x < 4.00) | (x > 250 * pad), # Minimum cost is $4 due to improv surcharge ($1) and min fee ($3). Reasonable upper bound
+        'congestion_surcharge': lambda x: x.notna() & (x != 0) & (x != 2.5), # Must be 0 or $2.5 as per TLC Taxi website. Accept NaNs - benefit of doubt.
         'Airport_fee': lambda x: x < 0,
         'duration_hours': lambda x: (x < 0.01) | (x > 2 * pad), # to remove any entries which took zero time
         'avg_speed_mph': lambda x: (x <= 0) | (x > 40 * pad), # to remove any entries which suggest the taxi has moved unrealistically far in a given time.
@@ -312,7 +334,7 @@ def get_constraint_violations(df, pad=1):
             mask = condition(df[col])
             violations[col] = df.index[mask].tolist()
 
-    # Datetime check
+    # Datetime check. Ensure dates make sense.
     if 'tpep_pickup_datetime' in df.columns and 'tpep_dropoff_datetime' in df.columns:
         mask = df['tpep_dropoff_datetime'] < df['tpep_pickup_datetime']
         violations['pickup_before_dropoff'] = df.index[mask].tolist()
@@ -324,7 +346,7 @@ def get_constraint_violations(df, pad=1):
 
     return violations, all_bad_indices
 
-# ##
+###
 
 # clean the dataset for real now
 
@@ -350,6 +372,7 @@ print(f"Total bad rows: {len(bad_idx_pad)}")
 print(f"Ratio bad rows: {len(bad_idx_pad) / len(rides)}")
 rides_pad = rides.drop(index=bad_idx_pad)
 
+# Make plots
 for i, ax in nplots(len(raw_numeric), 4):
     feature = raw_numeric[i]
     ax.hist(
@@ -358,7 +381,7 @@ for i, ax in nplots(len(raw_numeric), 4):
             rides_clean[feature].dropna(),
         ],
         label=["upper bound x4", "upper bound"],
-        bins=50,
+        bins=50, # Empirically enough to show trends
         log=True,
     )
     ax.set_title(feature)
@@ -367,6 +390,8 @@ for i, ax in nplots(len(raw_numeric), 4):
 
 ###md
 
+# Note: the above graphs are quite small, but this is acceptable as they are only meant to highlight the tails that have been removed.
+#
 # The above graph looks extreme, but it is in log scale. In a linear scale
 # it looks more appropriate. More dat is often better, but these variables
 # have very long tails which can throw off mechanisms like scaling and makes
@@ -375,10 +400,9 @@ for i, ax in nplots(len(raw_numeric), 4):
 # Future work would be to try to non-linearly compress the outlying values
 # instead of throwing them out entirely.
 #
-# All things considered, the discarded data is <3% of the training data
+# All things considered, the discarded data is < 5% of the training data. This is quite a small amount, so we are satisfied that the value of the the data is not diminished, but a number of unrealistic data points have been removed.
 
 ###
-
 
 for i, ax in nplots(len(raw_numeric), 4):
     feature = raw_numeric[i]
@@ -389,10 +413,13 @@ for i, ax in nplots(len(raw_numeric), 4):
 
 ###
 
+# Check dimensions of the cleaned set.
 rides_clean.dtypes
 rides_clean.shape
 
 ###
+
+# Save the cleaned data for later use.
 
 def save_split(df, prefix, rows_per_file=1800000):
     for i in range(0, ceildiv(len(df), rows_per_file)):
@@ -404,4 +431,6 @@ save_split(
 )
 
 ###
+
+
 
