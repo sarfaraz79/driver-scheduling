@@ -11,6 +11,7 @@ import seaborn as sns
 import os
 import glob
 from contextlib import contextmanager
+import joblib as job
 
 ###
 
@@ -118,7 +119,8 @@ def load_clean(pat):
 ###
 
 rides_train = load_clean("train_*")
-rides_sample = load_clean("sample_*")
+rides_test = load_clean("test_*")
+# rides_sample = load_clean("sample_*")
 
 ###
 
@@ -324,7 +326,10 @@ def build_xy(rides_clean, y_col, lags):
         pd.concat(
             [
                 rides_feat,
-                pd.get_dummies(rides_feat["RatecodeID"], prefix="ratecode_is"),
+                pd.DataFrame({
+                    f"ratecode_is_{n}": rides_feat["RatecodeID"] == n
+                    for n in [1, 2, 3, 4, 5, 6, 99]
+                }),
                 pd.DataFrame(dict(
                     do_is_upper_east=rides_feat["DOLocationID"].isin(zone_upper_east),
                     do_is_midtown=rides_feat["DOLocationID"].isin(zone_midtown),
@@ -414,18 +419,6 @@ def build_xy(rides_clean, y_col, lags):
 
 ###
 
-# https://stackoverflow.com/a/28384887
-class DenseTransformer(sk.base.TransformerMixin):
-
-    def fit(self, X, y=None, **fit_params):
-        return self
-
-    def transform(self, X, y=None, **fit_params):
-        return X.toarray() if hasattr(X, "toarray") else X
-
-###
-
-
 def evalcv(
     rides_clean_train,
     rides_clean_test,
@@ -434,17 +427,27 @@ def evalcv(
     model,
     param_grid,
 ):
+    pre = sk.clone(full_pipeline)
+
+    print("building sets")
+
     X, y = build_xy(rides_clean_train, target, lags)
+    X = pre.fit_transform(X, y)
+    X = X.toarray() if hasattr(X, "toarray") else X
+
+    X_test, y_test = build_xy(rides_clean_test, target, lags)
+    X_test = pre.transform(X_test)
+    X_test = X_test.toarray() if hasattr(X, "toarray") else X_test
+
+    print("train set size", X.shape)
+    print("test set size", X_test.shape)
+    print("starting gridsearch")
 
     cv = sk.model_selection.GridSearchCV(
-        estimator=sk.pipeline.Pipeline([
-            ("prep", sk.clone(full_pipeline)),
-            ("todense", DenseTransformer()),
-            ("model", model),
-        ]),
+        model,
         param_grid=param_grid,
         cv=sk.model_selection.ShuffleSplit(
-            n_splits=5,
+            n_splits=2,
             train_size=200_000,
             test_size=50_000,
         ),
@@ -455,6 +458,8 @@ def evalcv(
     )
 
     cv.fit(X, y)
+
+    print("finished gridsearch")
 
     print("\n" * 5)
 
@@ -467,51 +472,56 @@ def evalcv(
     print("=")
 
     print(cv.best_params_)
+    best = model.set_params(**cv.best_params_)
+    best.fit(X, y)
 
-    X_test, y_test = build_xy(rides_clean_test, target, lags)
-    y_pred = cv.best_estimator_.predict(X_test)
+    y_pred = best.predict(X_test)
 
     imp = sk.inspection.permutation_importance(
-        cv.best_estimator_,
+        best,
         X_test,
         y_test,
         scoring="neg_mean_squared_error",
-        n_repeats=10,
+        n_repeats=5,
         random_state=2718,
         n_jobs=-1,
     )
 
-    feature_names = cv.best_estimator_.named_steps["prep"].get_feature_names_out()
+    feature_names = pre.get_feature_names_out()
 
     imp_df = pd.DataFrame({
-        "feature": X.columns,
+        "feature": feature_names,
         "importance_mean": imp.importances_mean,
         "importance_std": imp.importances_std,
     }).sort_values("importance_mean", ascending=True).reset_index(drop=True)
+
+    print("importance complete")
 
     return cv, y_test, y_pred, imp_df
 
 ###
 
 nn_param_grid = {
-    "model__hidden_layer_sizes": [
+    "hidden_layer_sizes": [
         (25, 25, 10, 15),
         (25, 25, 25),
         (50, 25),
     ],
-    "model__activation": ["relu", "tanh"],
-    "model__alpha": [0.0001, 0.001, 0.01],
-    "model__learning_rate_init": [0.001, 0.01],
+    "activation": ["relu", "tanh"],
+    "alpha": [0.0001, 0.001, 0.01],
+    "learning_rate_init": [0.001, 0.01],
 }
 
 cv_demand, y_test, y_pred, imp = evalcv(
-    rides_sample,
-    rides_sample,
+    rides_train,
+    rides_test,
     "cur_count",
     demand_lags,
-    sk.neural_network.MLPRegressor(random_state=2718, max_iter=100),
+    sk.neural_network.MLPRegressor(random_state=2718),
     nn_param_grid,
 )
+
+###
 
 with oneplot() as ax:
     sns.scatterplot(
@@ -519,7 +529,6 @@ with oneplot() as ax:
         x=y_pred,
         y=y_test,
         s=0.2,
-        alpha=0.8,
         linewidth=0,
     ),
     ax.set_xlabel("prediction")
@@ -528,47 +537,33 @@ with oneplot() as ax:
 
 ###
 
-with oneplot(figsize=(12, 4), tight=True) as ax:
+with oneplot(figsize=(12, 30), tight=True) as ax:
     imp.plot.barh(
         ax=ax,
         x="feature",
         y="importance_mean",
-        yerr="importance_std",
-    )
-
-###
-
-with oneplot(figsize=(12, 4), tight=True) as ax:
-    imp[
-        ~imp["feature"].isin(["PULocationID", "pickup_hour_of_day"])
-    ].plot.barh(
-        ax=ax,
-        x="feature",
-        y="importance_mean",
-        yerr="importance_std",
+        xerr="importance_std",
     )
 
 ###
 
 gb_param_grid = {
-    "model__max_iter": [
-        100,
-        200,
-    ],
-    "model__min_samples_leaf": [10, 20, 40],
-    "model__max_depth": [None, 64],
-    "model__max_leaf_nodes": [31, 63, None],
-    "model__learning_rate": [0.01, 0.1, 0.12],
+    "min_samples_leaf": [10, 20, 40],
+    "max_depth": [None, 64],
+    "max_leaf_nodes": [31, 63, None],
+    "learning_rate": [0.01, 0.1, 0.12],
 }
 
-cv_demand, y_test, y_pred, imp = evalcv(
-    rides_sample,
-    rides_sample,
+cv_revenue, y_test, y_pred, imp = evalcv(
+    rides_train,
+    rides_test,
     "cur_fare_amount_mean",
     revenue_lags,
     sk.ensemble.HistGradientBoostingRegressor(random_state=2718),
     gb_param_grid,
 )
+
+###
 
 with oneplot() as ax:
     sns.scatterplot(
@@ -576,7 +571,6 @@ with oneplot() as ax:
         x=y_pred,
         y=y_test,
         s=0.2,
-        alpha=0.8,
         linewidth=0,
     ),
     ax.set_xlabel("prediction")
@@ -585,24 +579,15 @@ with oneplot() as ax:
 
 ###
 
-with oneplot(figsize=(12, 4), tight=True) as ax:
+with oneplot(figsize=(12, 30), tight=True) as ax:
     imp.plot.barh(
         ax=ax,
         x="feature",
         y="importance_mean",
-        yerr="importance_std",
+        xerr="importance_std",
     )
 
 ###
 
-with oneplot(figsize=(12, 4), tight=True) as ax:
-    imp[
-        ~imp["feature"].isin(["PULocationID", "pickup_hour_of_day"])
-    ].plot.barh(
-        ax=ax,
-        x="feature",
-        y="importance_mean",
-        yerr="importance_std",
-    )
 
 
