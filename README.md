@@ -8,6 +8,22 @@ Private group repository for the ID5059 coursework project.
 jupyter notebook
 ```
 
+## Contents
+* `studres/` - practical brief and data
+  * the `data/` directory is removed due to upload limitations
+* `final/` - deliverable notebooks
+    * split by different stages of project
+    * must be run in order of the number prefix to reproduce results eg.
+      `00_split` then `01_cleaning` then `02_eda` etc.
+* `dataset-split/` - initial test/train split
+  * checked into git but removed from submission due to upload limitations
+* `dataset-clean/` - datasets with invlid and outlying data removed
+  * checked into git but removed from submission due to upload limitations
+* `explore/` - notebooks from initial data exploration
+* `py/` - work files for coalescing group work (not all memebers are familiar
+   with git)
+` `
+
 ## Objective
 Build models to predict Manhattan ride demand and fare/revenue using 2024 NYC Taxi data.
 
@@ -17,6 +33,3 @@ Build models to predict Manhattan ride demand and fare/revenue using 2024 NYC Ta
 - Summary report
 - predictions.csv
 - Individual contribution statement
-
-## Notes
-This repository is private and intended only for group collaboration.
