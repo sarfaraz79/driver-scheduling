@@ -8,4 +8,4 @@ venv/
 *.log
 dataset/rides_train.csv
 dataset/rides_test.csv
-studres/data
+studres/data/*.csv

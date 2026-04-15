@@ -117,6 +117,8 @@ def load_clean(pat):
 
 ###
 
+rides_train = load_clean("train_*")
+# rides_sample = load_clean("sample_*")
 
 
 ###
@@ -199,6 +201,32 @@ demand_lags = [
 
     ("tip_ratio_mean", "mean", "1h", ["23h", "24h", "48h"]),
     ("tip_ratio_mean", "mean", "1d", ["1d", "2d", "5d", "7d"]),
+
+    ("ratecode_is_1_mean" , "mean", "2h", ["23h", "24h"]),
+    ("ratecode_is_2_mean" , "mean", "2h", ["23h", "24h"]),
+    ("ratecode_is_3_mean" , "mean", "2h", ["23h", "24h"]),
+    ("ratecode_is_4_mean" , "mean", "2h", ["23h", "24h"]),
+    ("ratecode_is_5_mean" , "mean", "2h", ["23h", "24h"]),
+    ("ratecode_is_6_mean" , "mean", "2h", ["23h", "24h"]),
+    ("ratecode_is_99_mean", "mean", "2h", ["23h", "24h"]),
+    ("ratecode_is_1_mean" , "mean", "1d", ["1d", "2d"]),
+    ("ratecode_is_2_mean" , "mean", "1d", ["1d", "2d"]),
+    ("ratecode_is_3_mean" , "mean", "1d", ["1d", "2d"]),
+    ("ratecode_is_4_mean" , "mean", "1d", ["1d", "2d"]),
+    ("ratecode_is_5_mean" , "mean", "1d", ["1d", "2d"]),
+    ("ratecode_is_6_mean" , "mean", "1d", ["1d", "2d"]),
+    ("ratecode_is_99_mean", "mean", "1d", ["1d", "2d"]),
+
+    ("do_is_upper_east_mean", "mean", "2h", ["23h", "24h"]),
+    ("do_is_midtown_mean"   , "mean", "2h", ["23h", "24h"]),
+    ("do_is_financial_mean" , "mean", "2h", ["23h", "24h"]),
+    ("do_is_turtle_bay_mean", "mean", "2h", ["23h", "24h"]),
+    ("do_is_north_mean"     , "mean", "2h", ["23h", "24h"]),
+    ("do_is_upper_east_mean", "mean", "1d", ["1d", "2d"]),
+    ("do_is_midtown_mean"   , "mean", "1d", ["1d", "2d"]),
+    ("do_is_financial_mean" , "mean", "1d", ["1d", "2d"]),
+    ("do_is_turtle_bay_mean", "mean", "1d", ["1d", "2d"]),
+    ("do_is_north_mean"     , "mean", "1d", ["1d", "2d"]),
 ]
 
 revenue_lags = [
@@ -211,14 +239,37 @@ revenue_lags = [
     ("trip_distance_mean", "mean", "1h", ["23h", "24h", "48h"]),
     ("trip_distance_mean", "mean", "1d", ["1d", "2d", "5d", "7d"]),
 
-    # no linear correlations, but maybe good for correlations in a
-    # latent space
-
     ("avg_speed_mph_mean", "mean", "1h", ["23h", "24h", "48h"]),
     ("avg_speed_mph_mean", "mean", "1d", ["1d", "2d", "5d", "7d"]),
 
     ("tip_ratio_mean", "mean", "1h", ["23h", "24h", "48h"]),
     ("tip_ratio_mean", "mean", "1d", ["1d", "2d", "5d", "7d"]),
+
+    ("ratecode_is_1_mean" , "mean", "2h", ["23h", "24h"]),
+    ("ratecode_is_2_mean" , "mean", "2h", ["23h", "24h"]),
+    ("ratecode_is_3_mean" , "mean", "2h", ["23h", "24h"]),
+    ("ratecode_is_4_mean" , "mean", "2h", ["23h", "24h"]),
+    ("ratecode_is_5_mean" , "mean", "2h", ["23h", "24h"]),
+    ("ratecode_is_6_mean" , "mean", "2h", ["23h", "24h"]),
+    ("ratecode_is_99_mean", "mean", "2h", ["23h", "24h"]),
+    ("ratecode_is_1_mean" , "mean", "1d", ["1d", "2d"]),
+    ("ratecode_is_2_mean" , "mean", "1d", ["1d", "2d"]),
+    ("ratecode_is_3_mean" , "mean", "1d", ["1d", "2d"]),
+    ("ratecode_is_4_mean" , "mean", "1d", ["1d", "2d"]),
+    ("ratecode_is_5_mean" , "mean", "1d", ["1d", "2d"]),
+    ("ratecode_is_6_mean" , "mean", "1d", ["1d", "2d"]),
+    ("ratecode_is_99_mean", "mean", "1d", ["1d", "2d"]),
+
+    ("do_is_upper_east_mean", "mean", "2h", ["23h", "24h"]),
+    ("do_is_midtown_mean"   , "mean", "2h", ["23h", "24h"]),
+    ("do_is_financial_mean" , "mean", "2h", ["23h", "24h"]),
+    ("do_is_turtle_bay_mean", "mean", "2h", ["23h", "24h"]),
+    ("do_is_north_mean"     , "mean", "2h", ["23h", "24h"]),
+    ("do_is_upper_east_mean", "mean", "1d", ["1d", "2d"]),
+    ("do_is_midtown_mean"   , "mean", "1d", ["1d", "2d"]),
+    ("do_is_financial_mean" , "mean", "1d", ["1d", "2d"]),
+    ("do_is_turtle_bay_mean", "mean", "1d", ["1d", "2d"]),
+    ("do_is_north_mean"     , "mean", "1d", ["1d", "2d"]),
 ]
 
 ###
@@ -243,7 +294,13 @@ full_pipeline = sk.compose.ColumnTransformer([
 
 ###
 
-def build_xy(rides_clean, y_col, lags, is_test=True):
+zone_upper_east = [str(x) for x in [236, 237, 141, 142, 262]]
+zone_midtown = [str(x) for x in [161, 162, 163]]
+zone_financial = [str(x) for x in [12, 88, 87, 261]]
+zone_turtle_bay = [str(x) for x in [162, 229]]
+zone_north = [str(x) for x in [42, 116, 127, 243, 255]]
+
+def build_xy(rides_clean, y_col, lags):
     rides_feat = rides_clean.assign(
         pickup_hour = lambda x: x["tpep_pickup_datetime"].dt.floor("1h"),
         pickup_hour_of_day = lambda x:
@@ -260,8 +317,19 @@ def build_xy(rides_clean, y_col, lags, is_test=True):
     )
 
     rides_hour = group_zone_hour(
-        rides_feat.assign(
-            tip_ratio=lambda x: x["tip_amount"] / x["total_amount"],
+        pd.concat(
+            [
+                rides_feat,
+                pd.get_dummies(rides_feat["RatecodeID"], prefix="ratecode_is"),
+                pd.DataFrame(dict(
+                    do_is_upper_east=rides_feat["DOLocationID"].isin(zone_upper_east),
+                    do_is_midtown=rides_feat["DOLocationID"].isin(zone_midtown),
+                    do_is_financial=rides_feat["DOLocationID"].isin(zone_financial),
+                    do_is_turtle_bay=rides_feat["DOLocationID"].isin(zone_turtle_bay),
+                    do_is_north=rides_feat["DOLocationID"].isin(zone_north),
+                ))
+            ],
+            axis=1,
         ),
         dict(
             passenger_count="mean",
@@ -289,6 +357,20 @@ def build_xy(rides_clean, y_col, lags, is_test=True):
             avg_speed_mph="mean",
             fare_per_hour="mean",
             ratecode_is_airport=["mean", "count"],
+
+            ratecode_is_1="mean",
+            ratecode_is_2="mean",
+            ratecode_is_3="mean",
+            ratecode_is_4="mean",
+            ratecode_is_5="mean",
+            ratecode_is_6="mean",
+            ratecode_is_99="mean",
+
+            do_is_upper_east="mean",
+            do_is_midtown="mean",
+            do_is_financial="mean",
+            do_is_turtle_bay="mean",
+            do_is_north="mean",
         ),
     ).assign(
         pickup_hour_of_day=lambda x: x["pickup_hour"].dt.hour,
@@ -324,28 +406,16 @@ def build_xy(rides_clean, y_col, lags, is_test=True):
 
     assert all((x.startswith("lag_") or x in index_cols) for x in X.columns)
 
-    if is_test:
-        return (
-            full_pipeline.transform(X),
-            y,
-        )
-    else:
-        return (
-            full_pipeline.fit_transform(X, y),
-            y,
-        )
-
-
-###
-
-rides_train = load_clean("train_*")
-rides_sample = load_clean("sample_*")
+    return X, y
 
 ###
 
 class Eval:
     def __init__(self, xy):
         self.X, self.y = xy
+        self.X = sk.clone(full_pipeline).fit_transform(
+            self.X.toarray() if hasattr(self.X, "toarray") else self.X,
+        )
 
         [(self.train_idx, self.valid_idx)] = sk.model_selection.ShuffleSplit(
             n_splits=1,
@@ -356,10 +426,11 @@ class Eval:
             y=self.y,
         )
 
+
     def eval(self, m):
         xv = sk.model_selection.cross_validate(
             m,
-            self.X[self.train_idx].toarray(),
+            self.X[self.train_idx],
             self.y[self.train_idx],
             cv=5,
             scoring="neg_mean_squared_error",
@@ -375,8 +446,8 @@ class Eval:
 
         best = xv["estimator"][np.argmin(xv["test_score"])]
 
-        return pd.DataFrame(dict(
-            pred = best.predict(self.X[self.valid_idx].toarray()),
+        return xv, str(best), pd.DataFrame(dict(
+            pred = best.predict(self.X[self.valid_idx]),
             actual = self.y[self.valid_idx],
             model = str(best),
         ))
@@ -387,26 +458,24 @@ class Eval:
 
 ###
 
+
 demand_eval = Eval(
-    build_xy(rides_train, "cur_count", demand_lags, is_test=False),
+    build_xy(rides_train, "cur_count", demand_lags),
 )
 
-results = pd.concat(
-    (
-        demand_eval.eval(m)
-        for m in [
-            sk.linear_model.LinearRegression(),
-            sk.ensemble.HistGradientBoostingRegressor(),
-            sk.neural_network.MLPRegressor(hidden_layer_sizes=(25, 25, 10)),
-        ]
-    ),
-    ignore_index=True,
-)
+results = [
+    demand_eval.eval(m)
+    for m in [
+        sk.linear_model.LinearRegression(),
+        sk.ensemble.HistGradientBoostingRegressor(),
+        sk.neural_network.MLPRegressor(hidden_layer_sizes=(25, 25, 10)),
+    ]
+]
 
 with oneplot() as ax:
     sns.scatterplot(
         ax=ax,
-        data=results,
+        data=pd.concat([x[2] for x in results], ignore_index=True),
         x="pred",
         y="actual",
         hue="model",
@@ -418,6 +487,14 @@ with oneplot() as ax:
     ax.set_ylabel("actual")
     ax.set_title("Demand model selection")
 
+###
+
+pd.DataFrame({ x[1] : x[0]["test_score"] for x in results })
+
+###
+
+pd.DataFrame({ x[1] : x[0]["test_score"] for x in results }).describe()
+
 ###md
 
 # # Eval off-the-shelf models for revenue
@@ -425,25 +502,21 @@ with oneplot() as ax:
 ###
 
 revenue_eval = Eval(
-    build_xy(rides_train, "cur_fare_amount_mean", revenue_lags, is_test=False),
+    build_xy(rides_train, "cur_fare_amount_mean", revenue_lags),
 )
-
-results = pd.concat(
-    (
-        revenue_eval.eval(m)
-        for m in [
-            sk.linear_model.LinearRegression(),
-            sk.ensemble.HistGradientBoostingRegressor(),
-            sk.neural_network.MLPRegressor(hidden_layer_sizes=(25, 25, 10)),
-        ]
-    ),
-    ignore_index=True,
-)
+results = [
+    revenue_eval.eval(m)
+    for m in [
+        sk.linear_model.LinearRegression(),
+        sk.ensemble.HistGradientBoostingRegressor(),
+        sk.neural_network.MLPRegressor(hidden_layer_sizes=(25, 25, 10)),
+    ]
+]
 
 with oneplot() as ax:
     sns.scatterplot(
         ax=ax,
-        data=results,
+        data=pd.concat([x[2] for x in results], ignore_index=True),
         x="pred",
         y="actual",
         hue="model",
@@ -454,3 +527,14 @@ with oneplot() as ax:
     ax.set_xlabel("prediction")
     ax.set_ylabel("actual")
     ax.set_title("Revenue model selection")
+
+###
+
+pd.DataFrame({ x[1] : x[0]["test_score"] for x in results })
+
+###
+
+pd.DataFrame({ x[1] : x[0]["test_score"] for x in results }).describe()
+
+###
+
