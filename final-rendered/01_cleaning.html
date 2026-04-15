@@ -7576,6 +7576,17 @@ a.anchor-link {
 </div>
 </div>
 </div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h1 id="Loading-the-dataset">Loading the dataset<a class="anchor-link" href="#Loading-the-dataset">¶</a></h1><p>Defining a reusable loader that concatenates multiple CSV files matching a glob pattern into a single DataFrame, then loading the Manhattan zone lookup and the chosen data subset.</p>
+</div>
+</div>
+</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -7643,7 +7654,7 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="Selection-and-loading-the-dataset">Selection and loading the dataset<a class="anchor-link" href="#Selection-and-loading-the-dataset">¶</a></h1><p><strong>In order to clean data for different train/test splits</strong></p>
+<h1 id="Loading-the-dataset">Loading the dataset<a class="anchor-link" href="#Loading-the-dataset">¶</a></h1>
 </div>
 </div>
 </div>
@@ -8200,6 +8211,17 @@ VendorID
 </div>
 </div>
 </div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h1 id="Type-Conversions-&amp;-Derived-Features">Type Conversions &amp; Derived Features<a class="anchor-link" href="#Type-Conversions-&amp;-Derived-Features">¶</a></h1><p>Converting the store_and_fwd_flag string column to a proper boolean, then computing three new columns: trip duration in hours, average speed in mph, and fare earned per hour.</p>
+</div>
+</div>
+</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -8345,6 +8367,17 @@ that as early as possible.</p>
 <span class="p">)</span>
 </pre></div>
 </div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h1 id="Exploratory-Distribution-Plots">Exploratory Distribution Plots<a class="anchor-link" href="#Exploratory-Distribution-Plots">¶</a></h1><p>Generating exploratory distribution plots for all categorical and numerical columns in the raw (uncleaned) data, in both linear and log scale.</p>
 </div>
 </div>
 </div>
@@ -8520,6 +8553,17 @@ that as early as possible.</p>
 </div>
 </div>
 </div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h1 id="Tail-Investigation-&amp;-Cut-off-Calibration">Tail Investigation &amp; Cut-off Calibration<a class="anchor-link" href="#Tail-Investigation-&amp;-Cut-off-Calibration">¶</a></h1><p>Quantifying how many rows fall outside a set of candidate thresholds, and reporting the quantile position of those rows in the overall distribution.</p>
+</div>
+</div>
+</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -8642,6 +8686,17 @@ Name: count, dtype: int64
 </div>
 </div>
 </div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h1 id="Centralising-all-checks-in-one-function">Centralising all checks in one function<a class="anchor-link" href="#Centralising-all-checks-in-one-function">¶</a></h1>
+</div>
+</div>
+</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -8693,6 +8748,17 @@ Name: count, dtype: int64
     <span class="k">return</span> <span class="n">violations</span><span class="p">,</span> <span class="n">all_bad_indices</span>
 </pre></div>
 </div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h1 id="Applying-the-constraints-&amp;-reporting">Applying the constraints &amp; reporting<a class="anchor-link" href="#Applying-the-constraints-&amp;-reporting">¶</a></h1>
 </div>
 </div>
 </div>
@@ -8750,6 +8816,17 @@ Total bad rows: 1039522
 Ratio bad rows: 0.03761846671170896
 </pre>
 </div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h1 id="Visualising-the-Cut-off-Boundaries">Visualising the Cut-off Boundaries<a class="anchor-link" href="#Visualising-the-Cut-off-Boundaries">¶</a></h1>
 </div>
 </div>
 </div>
@@ -8883,6 +8960,17 @@ instead of throwing them out entirely.</p>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
 <pre>(26593768, 22)</pre>
 </div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h1 id="Saving-the-Cleaned-Data">Saving the Cleaned Data<a class="anchor-link" href="#Saving-the-Cleaned-Data">¶</a></h1>
 </div>
 </div>
 </div>
