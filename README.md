@@ -27,11 +27,13 @@ Notebooks should be run sequentially on prefix number (`00_..`, `01_..`, ...)
       `00_split` then `01_cleaning` then `02_eda` etc.
 * `final-rendered/` - final notebooks rendered to HTML
 * `studres/` - practical brief and data
-  * the `data/` directory is removed due to upload limitations
+  * the `data/` sub-directory is removed due to upload limitations
 * `dataset-split/` - initial test/train split
   * checked into git but removed from submission due to upload limitations
+  * **NOTE:** - dummy files from git-lfs may live in this directory
 * `dataset-clean/` - datasets with invlid and outlying data removed
   * checked into git but removed from submission due to upload limitations
+  * **NOTE:** - dummy files from git-lfs may live in this directory
 * `explore/` - notebooks from initial data exploration
 * `py/` - work files for coalescing group work (not all memebers are familiar
    with git)
