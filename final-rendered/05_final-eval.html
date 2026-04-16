@@ -8604,6 +8604,28 @@ test   933.370341  30.551110  16.607982  0.885111
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>High-demand zones/hours</p>
+<ul>
+<li>predictions are more accurate and stable</li>
+<li>the model captures peak demand patterns well</li>
+</ul>
+<p>Low-demand zones/hours (&lt;10 trips)</p>
+<ul>
+<li>higher relative error</li>
+<li>greater noise makes prediction more difficult</li>
+<li>some tendency to overpredict (regression to the mean)</li>
+</ul>
+<p>This behaviour is expected when modelling count-based demand</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="Feature-importance">Feature importance<a class="anchor-link" href="#Feature-importance">¶</a></h2>
 </div>
 </div>
@@ -8647,18 +8669,15 @@ test   933.370341  30.551110  16.607982  0.885111
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>High-demand zones/hours</p>
 <ul>
-<li>predictions are more accurate and stable</li>
-<li>the model captures peak demand patterns well</li>
+<li>as expected, most important features are lagged count, duration, and distance</li>
+<li>pickup hour of day is also important</li>
+<li>many unimportant features, future model might remove this</li>
+<li>somewhat surprisingly, pickup location is not in the top of the feature importances<ul>
+<li>this suggests the data is not overfit (ie. the nn did not memorize inputs per zone)</li>
 </ul>
-<p>Low-demand zones/hours (&lt;10 trips)</p>
-<ul>
-<li>higher relative error</li>
-<li>greater noise makes prediction more difficult</li>
-<li>some tendency to overpredict (regression to the mean)</li>
+</li>
 </ul>
-<p>This behaviour is expected when modelling count-based demand</p>
 </div>
 </div>
 </div>
@@ -9002,6 +9021,33 @@ test   31.994848  5.656399  3.216052  0.351421
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>High-fare zones/hours</p>
+<ul>
+<li>predictions are reasonably stable</li>
+<li>some underprediction may occur for the highest fares</li>
+</ul>
+<p>Low-fare zones/hours</p>
+<ul>
+<li>predictions are more consistent</li>
+<li>lower variance makes fares easier to estimate</li>
+</ul>
+<p>Airport trips</p>
+<ul>
+<li>the model consistently fails to correctly predict airpoirt trips at the $70 fixed fee</li>
+<li>this is potentially die to there being few such trips in the data, relatively speaking</li>
+<li>perhaps a separate model for this would have been a good idea</li>
+</ul>
+<p>While less precise than the demand model, it is sufficient for comparing expected earnings across zones and time periods, making it useful for supporting driver allocation and revenue optimisation decisions.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="Feature-importance">Feature importance<a class="anchor-link" href="#Feature-importance">¶</a></h2>
 </div>
 </div>
@@ -9045,23 +9091,11 @@ test   31.994848  5.656399  3.216052  0.351421
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>High-fare zones/hours</p>
 <ul>
-<li>predictions are reasonably stable</li>
-<li>some underprediction may occur for the highest fares</li>
+<li>zone 194 is the top feature (indicating overfit, this zone has low demand)</li>
+<li>other important lags are expected, hour of day and mean fare amount lags</li>
+<li>again, many features are unimportant and future work could reduce the cost of running these models by removing them</li>
 </ul>
-<p>Low-fare zones/hours</p>
-<ul>
-<li>predictions are more consistent</li>
-<li>lower variance makes fares easier to estimate</li>
-</ul>
-<p>Airport trips</p>
-<ul>
-<li>the model consistently fails to correctly predict airpoirt trips at the $70 fixed fee</li>
-<li>this is potentially die to there being few such trips in the data, relatively speaking</li>
-<li>perhaps a separate model for this would have been a good idea</li>
-</ul>
-<p>While less precise than the demand model, it is sufficient for comparing expected earnings across zones and time periods, making it useful for supporting driver allocation and revenue optimisation decisions.</p>
 </div>
 </div>
 </div>
@@ -9250,6 +9284,7 @@ test   31.994848  5.656399  3.216052  0.351421
 <h1 id="Summary-and-future-work">Summary and future work<a class="anchor-link" href="#Summary-and-future-work">¶</a></h1><ul>
 <li>revenue model seems to be overfit to low-demand zones (eg. 194 and 243 have high feature importance but are in the bottom 10 of rides)</li>
 <li>use a library specialized for neural networks which tracks validation performance during training</li>
+<li>remove unimportant features</li>
 </ul>
 </div>
 </div>
